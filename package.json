@@ -9,6 +9,8 @@
     "gasless-usdc": "ts-node src/gaslessExactInUSDC.ts",
     "gasless-trustline": "ts-node src/gaslessTrustlineExactInUSDC.ts",
     "eurc-to-usdc": "ts-node src/gaslessSwapSDEXExactInEURC.ts",
+    "eurc-to-usdc-exact-out": "ts-node src/gaslessSwapSDEXExactOutUSDC.ts",
+    "multi-protocol-eurc": "ts-node src/gaslessSwapMultiProtocolExactInEURC.ts",
     "check-balances": "ts-node src/utils/checkBalances.ts"
   },
   "dependencies": {
