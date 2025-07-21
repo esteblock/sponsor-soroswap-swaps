@@ -11,6 +11,8 @@
     "eurc-to-usdc": "ts-node src/gaslessSwapSDEXExactInEURC.ts",
     "eurc-to-usdc-exact-out": "ts-node src/gaslessSwapSDEXExactOutUSDC.ts",
     "multi-protocol-eurc": "ts-node src/gaslessSwapMultiProtocolExactInEURC.ts",
+    "soroban-eurc-exact-out": "ts-node src/gaslessSwapSorobanExactOutEURC.ts",
+    "all-protocols-usdc": "ts-node src/gaslessSwapAllProtocolsExactInUSDC.ts",
     "check-balances": "ts-node src/utils/checkBalances.ts"
   },
   "dependencies": {

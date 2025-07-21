@@ -99,3 +99,34 @@ yarn ts-node src/gaslessSwapSorobanExactOutEURC.ts
 ```
 
 ## Now, one way to do it for all protocols (SDEX and Soroban)
+
+```
+yarn ts-node src/gaslessSwapSorobanExactOutEURC.ts
+```
+
+The best way to support all transactions:
+If the tx is SDEX, the sponsoring is as usual. If the tx is soroban, it wraps it and create a feebump tx ("soroban sponsorship")
+```javascript
+const quote = await soroswapSdk.quote({... protocols:[soroswap, phoenix, aqua]})
+const buildResponse = await soroswapSdk.build({quote, sponsor, from, to, referralId})
+const swapTransaction = TransactionBuilder.fromXDR(buildResponse.xdr, Networks.PUBLIC)
+
+let signedTransaction: Transaction | FeeBumpTransaction
+if (quote.platform === SupportedPlatforms.SDEX) {
+    swapTransaction.sign(userKeypair)
+    swapTransaction.sign(sponsorKeypair)
+    signedTransaction = swapTransaction as Transaction
+} else {
+    swapTransaction.sign(userKeypair)
+    const feeBumpTransaction: FeeBumpTransaction =
+    TransactionBuilder.buildFeeBumpTransaction(
+        sponsorAddress, // The new tx will be paid by the sponsor
+        swapTransaction.fee + 1, // New fee needs to be higher
+        swapTransaction as Transaction, // Tx signed by the user
+        Networks.PUBLIC
+    );
+    feeBumpTransaction.sign(sponsorKeypair)
+    signedTransaction = feeBumpTransaction as FeeBumpTransaction
+}
+const sendResponse = await soroswapSdk.send(signedTransaction.toXDR())
+```
