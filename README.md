@@ -1,44 +1,23 @@
 # Gasless USDC to EURC Swap
 
-This implementation demonstrates how to get quotes and execute swaps between ans USDC to EURC using the Soroswap Aggregator API.
+This implementation demonstrates how to get quotes and execute swaps between USDC to EURC using the Soroswap Aggregator API.
 
-As we suppose that wallets that will use the Gasless Swaps are wallets that already suport USDC, our first script will set up a wallet with 1 USDC with an sponsored truistline. While, the next ones will execute gasless swaps using the API
-
-## Features
-
-- ✅ Gasless trustline creation (no XLM needed for trustline)
-- ✅ Uses Soroswap Aggregator API
-- ✅ Supports fee sharing
-- ✅ Detailed quote information
+As we suppose that wallets that will use the Gasless Swaps are wallets that already suport USDC, our first script will set up a wallet with 1 USDC with an sponsored trustline. While, the next ones will execute gasless swaps using the API, for vaious cases
 
 ## Setup
 
-1. Install dependencies:
 ```bash
 yarn install
-```
-
-2. Create a `.env` file with your API credentials:
-```
 cp .env.example .env
 ```
-
-```bash
-# Soroswap API Configuration
-SOROSWAP_API_URL=https://soroswap-api-staging-436722401508.us-central1.run.app/
-SOROSWAP_API_KEY=your_api_key_here
-
-# Test Account Keys
-SPONSOr_SECRET=your_sponsor_account_secret_here # charge it with 10 XLM
-USER_SECRET=your_test_account_secret_here  # just create a new one using lab.stellar.org, dont even fund it
-REFERRAL_SECRET_KEY=
-```
+Setup your API KEY and SECRET KEYS
 
 ## Usage
 
 1. Setup the user and referral account.
-For the referral sponsors the creation and trustline of USDC and EURC
-For the user, sponsors the creatation and trustlne of USDC. Also sends it 1 USDC.
+- Sponsor the creation of a referral acount with USDC and EURC trustline
+- Sponsor the creation of a user account with USDC trustline and 1 USDC
+
 ```bash 
 yarn ts-node src/createSponsoredAccounts.ts  
 ```
@@ -50,7 +29,7 @@ yarn ts-node src/gaslessTrustlineExactInUSDC.ts # swap 0.5 USDC for EURC with ga
 ```
 
 ```javascript
-const quote = await soroswapSdk.quote({assetIn, ... gaslessTrustlie: create})
+const quote = await soroswapSdk.quote({... gaslessTrustlie: create, ...})
 const buildResponse = await soroswapSdk.build({quote, sponsor, from, to, referralId})
 const swapTransaction = TransactionBuilder.fromXDR(buildResponse.xdr, Networks.PUBLIC)
 
@@ -60,22 +39,41 @@ swapTransaction.sign(userKeypair)
 const sendResponse = await soroswapSdk.send(swapTransaction.toXDR())
 ```
 
-3. Swaps ExactIn 0.1 EURC to USDC using Soroswap API, forcing SDEX
+3. Swaps ExactIn 0.1 EURC to USDC using Soroswap API, forcing SDEX and sponsoring the gas.
 
-```javascript
-const quote = await soroswapSdk.quote({assetIn, ... })
-const buildResponse = await soroswapSdk.build({quote, sponsor, from, to, referralId})
-const swapTransaction = TransactionBuilder.fromXDR(buildResponse.xdr, Networks.PUBLIC)
-
-swapTransaction.sign(sponsorKeypair)
-swapTransaction.sign(userKeypair)
-
-const sendResponse = await soroswapSdk.send(swapTransaction.toXDR())
-```
 
 ```
 yarn ts-node src/gaslessSwapSDEXExactInEURC.ts
 ```
+
+```javascript
+const quote = await soroswapSdk.quote({... protocols:[sdex]})
+const buildResponse = await soroswapSdk.build({quote, sponsor, from, to, referralId})
+const swapTransaction = TransactionBuilder.fromXDR(buildResponse.xdr, Networks.PUBLIC)
+
+swapTransaction.sign(sponsorKeypair)
+swapTransaction.sign(userKeypair)
+
+const sendResponse = await soroswapSdk.send(swapTransaction.toXDR())
+```
+4. Swaps EURC to ExactOut 0.1 USDC using Soroswap API, forcing SDEX and sponsoring the gas
+
+```
+yarn ts-node src/gaslessSwapSDEXExactOutUSDC.ts
+```
+```javascript
+const quote = await soroswapSdk.quote({... protocols:[sdex]})
+const buildResponse = await soroswapSdk.build({quote, sponsor, from, to, referralId})
+const swapTransaction = TransactionBuilder.fromXDR(buildResponse.xdr, Networks.PUBLIC)
+
+swapTransaction.sign(sponsorKeypair)
+swapTransaction.sign(userKeypair)
+
+const sendResponse = await soroswapSdk.send(swapTransaction.toXDR())
+```
+5. Swap ExactIn 0.1 EURC to USDC using Soroswap API, and using only Soroban Protocols (soroswap, aqua, phoenix)
+
+
 
 ## What it does
 
