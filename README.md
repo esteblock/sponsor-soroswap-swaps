@@ -46,7 +46,35 @@ yarn ts-node src/createSponsoredAccounts.ts
 2. Swaps 0.5 USDC into EURC using Soroswap API and gaslessTrustline=true
 
 ```bash
-yarn ts-node src/gaslessExactInUSDC.ts # swap 0.5 USDC for EURC with gaslessTrustline
+yarn ts-node src/gaslessTrustlineExactInUSDC.ts # swap 0.5 USDC for EURC with gaslessTrustline
+```
+
+```javascript
+const quote = await soroswapSdk.quote({assetIn, ... gaslessTrustlie: create})
+const buildResponse = await soroswapSdk.build({quote, sponsor, from, to, referralId})
+const swapTransaction = TransactionBuilder.fromXDR(buildResponse.xdr, Networks.PUBLIC)
+
+swapTransaction.sign(sponsorKeypair)
+swapTransaction.sign(userKeypair)
+
+const sendResponse = await soroswapSdk.send(swapTransaction.toXDR())
+```
+
+3. Swaps ExactIn 0.1 EURC to USDC using Soroswap API, forcing SDEX
+
+```javascript
+const quote = await soroswapSdk.quote({assetIn, ... })
+const buildResponse = await soroswapSdk.build({quote, sponsor, from, to, referralId})
+const swapTransaction = TransactionBuilder.fromXDR(buildResponse.xdr, Networks.PUBLIC)
+
+swapTransaction.sign(sponsorKeypair)
+swapTransaction.sign(userKeypair)
+
+const sendResponse = await soroswapSdk.send(swapTransaction.toXDR())
+```
+
+```
+yarn ts-node src/gaslessSwapSDEXExactInEURC.ts
 ```
 
 ## What it does

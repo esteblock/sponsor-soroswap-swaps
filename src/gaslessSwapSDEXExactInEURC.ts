@@ -1,4 +1,4 @@
-import { GaslessTrustlineType, SoroswapSDK, SupportedAssetLists, SupportedProtocols, TradeType } from '@soroswap/sdk'
+import { SoroswapSDK, SupportedAssetLists, SupportedProtocols, TradeType } from '@soroswap/sdk'
 import { Keypair, TransactionBuilder, Networks} from '@stellar/stellar-sdk'
 import { config } from 'dotenv'
 import { checkUserBalances } from './utils/checkBalances'
@@ -20,7 +20,7 @@ const REFERRAL_SECRET = process.env.REFERRAL_SECRET_KEY
 
 // Fail if secret not set
 if (!SPONSOR_SECRET || !USER_SECRET || !REFERRAL_SECRET) {
-  console.error('SPONSOR_SECRET_KEY and USER_SECRET_KEY and REFERRAL_SECRET_KEY must be set');
+  console.error('SPONSOR_SECRET_KEY, USER_SECRET_KEY, and REFERRAL_SECRET_KEY must be set');
   process.exit(1);
 }
 
@@ -43,13 +43,14 @@ const soroswapSdk = new SoroswapSDK({
   apiKey: API_KEY,
   baseUrl: API_BASE_URL
 })
+
 async function main() {
   try {
     console.log(`🔑 Using Sponsor Address: ${sponsorAddress}`)
     console.log('')
     console.log(`👤 Using User Address: ${userAddress}`)
-    console.log('🚀 Starting gasless USDC to EURC swap...')
-    console.log('📊 User wants to swap 0.5 USDC for EURC with gasless trustline')
+    console.log('🚀 Starting EURC to USDC swap...')
+    console.log('📊 User wants to swap exactly 0.1 EURC for USDC')
     
     // Check balances before the swap
     console.log('')
@@ -57,16 +58,15 @@ async function main() {
     console.log('========================')
     const balancesBefore = await checkUserBalances(userAddress)
     
-
     const quoteRequest = {
-        assetIn: USDC_CONTRACT,
-        assetOut: EURC_CONTRACT,
-        amount: BigInt(5000000), // 0.5 USDC in stroops (7 decimals)
+        assetIn: EURC_CONTRACT,
+        assetOut: USDC_CONTRACT,
+        amount: BigInt(1000000), // 0.1 EURC in stroops (7 decimals)
         tradeType: TradeType.EXACT_IN,
-        protocols: [SupportedProtocols.SDEX, SupportedProtocols.SOROSWAP, SupportedProtocols.AQUA, SupportedProtocols.PHOENIX], // For gasless trustline, we need to use SDEX. 
+        protocols: [SupportedProtocols.SDEX],
         slippageBps: 50, // 0.5% slippage
         maxHops: 2,
-        gaslessTrustline: GaslessTrustlineType.CREATE, // Enable gasless trustline creation
+        // No gaslessTrustline since trustline already exists
         feeBps: 200, // 2% fee
         assetList: [SupportedAssetLists.SOROSWAP]
       }
@@ -79,17 +79,15 @@ async function main() {
     console.log('')
     console.log('Quote Response:', quote)
     
-
-       // Now build the transaction XDR
+    // Now build the transaction XDR
     console.log('')
     console.log('The user accepts the quote. Now we call the /build endpoint to build the transaction XDR...')
     
-    
     const buildRequest = {
       quote: quote,
-      sponsor: sponsorAddress, // Sponsor address for gasless trustline
+      sponsor: sponsorAddress, // Sponsor address for gasless swap
       from: userAddress, // User address
-      to: userAddress, // For gasless trustline, to must be same as from
+      to: userAddress, // Same as from
       referralId: referralAddress, 
     }
     
@@ -104,17 +102,27 @@ async function main() {
     const swapTransaction = TransactionBuilder.fromXDR(buildResponse.xdr, Networks.PUBLIC)
     
     console.log('')
-    console.log('The sponsor signs the transaction...')
-    swapTransaction.sign(sponsorKeypair)
-
-    console.log('')
     console.log('The user signs the transaction...')
     swapTransaction.sign(userKeypair)
+    
+    console.log('')
+    console.log('The sponsor signs the transaction...')
+    swapTransaction.sign(sponsorKeypair)
+    
+    console.log('')
+    console.log('The transaction XDR:', swapTransaction.toXDR())
+    
     console.log('')
     console.log('We submit the transaction to the network using the /send endpoint...')
-    const sendResponse = await soroswapSdk.send(swapTransaction.toXDR())
-    console.log('')
-    console.log('Send Response:', sendResponse)
+    try {
+      const sendResponse = await soroswapSdk.send(swapTransaction.toXDR())
+      console.log('')
+      console.log('Send Response:', sendResponse)
+    } catch (sendError: any) {
+      console.error('❌ Error sending transaction:', sendError.message)
+      console.error('Send error details:', sendError)
+      throw sendError
+    }
 
     console.log('')
     console.log('The transaction has been submitted to the network!')
@@ -156,4 +164,4 @@ async function main() {
 }
 
 // Run the main function
-main().catch(console.error)
+main().catch(console.error) 

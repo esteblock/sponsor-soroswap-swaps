@@ -27,6 +27,13 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@soroswap/sdk@^0.3.5":
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/@soroswap/sdk/-/sdk-0.3.5.tgz#0f26cec9198477fc61ef78214df9cc4413f1c0fc"
+  integrity sha512-wWedfHm4Spe9YXiXWg0q68C81gMvU81QXA9bUJhaTEBd42i9QGGKhlcVEIdGCaNSY0RVqeuOe/BUMxDHY3PNvw==
+  dependencies:
+    axios "^1.10.0"
+
 "@stellar/js-xdr@^3.1.2":
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@stellar/js-xdr/-/js-xdr-3.1.2.tgz#db7611135cf21e989602fd72f513c3bed621bc74"
@@ -116,7 +123,7 @@ available-typed-arrays@^1.0.7:
   dependencies:
     possible-typed-array-names "^1.0.0"
 
-axios@^1.8.4:
+axios@^1.10.0, axios@^1.6.0, axios@^1.8.4:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.10.0.tgz#af320aee8632eaf2a400b6a1979fa75856f38d54"
   integrity sha512-/1xYAC4MP/HEG+3duIhFr4ZQXR4sQXOIe+o6sdqzeykGLx6Upp/1p8MHqhINOvGeP7xyNHe7tsiJByc4SSVUxw==

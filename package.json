@@ -1,16 +1,22 @@
 {
-  "name": "stellar-tests",
+  "name": "sponsor-soroswap-swaps",
   "version": "1.0.0",
   "main": "dist/main.js",
-  "author": "coderipper",
+  "author": "esteblock",
   "license": "MIT",
   "scripts": {
-    "restore": "ts-node src/restoreKey.ts"
+    "restore": "ts-node src/restoreKey.ts",
+    "gasless-usdc": "ts-node src/gaslessExactInUSDC.ts",
+    "gasless-trustline": "ts-node src/gaslessTrustlineExactInUSDC.ts",
+    "eurc-to-usdc": "ts-node src/gaslessSwapSDEXExactInEURC.ts",
+    "check-balances": "ts-node src/utils/checkBalances.ts"
   },
   "dependencies": {
     "@stellar/stellar-sdk": "^13.0.0",
+    "@soroswap/sdk": "^0.3.5",
     "dotenv": "^16.4.7",
-    "soroban-toolkit": "^0.1.2"
+    "soroban-toolkit": "^0.1.2",
+    "axios": "^1.6.0"
   },
   "devDependencies": {
     "@types/node": "^20.6.1",
